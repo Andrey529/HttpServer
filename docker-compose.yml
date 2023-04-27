@@ -1,0 +1,10 @@
+version: "3.5"
+
+services:
+  IoTService:
+    container_name: HttpServer
+    image: http-server
+    build: .
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
