@@ -68,7 +68,7 @@ void http::Server::start() {
 
     // clearing of all dead processes
     struct sigaction sa;
-    sa.sa_handler = http::detail::sigchld_handler;
+    sa.sa_handler = http::detail::net::sigchld_handler;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     if (sigaction(SIGCHLD, &sa, nullptr) == -1) {
@@ -89,7 +89,7 @@ void http::Server::start() {
         std::cout << "====== New connection ======\n" << std::endl;
 
         char remoteHost[INET6_ADDRSTRLEN];
-        inet_ntop(their_address.ss_family, http::detail::get_in_addr((struct sockaddr *) &their_address), remoteHost,
+        inet_ntop(their_address.ss_family, http::detail::net::get_in_addr((struct sockaddr *) &their_address), remoteHost,
                   sizeof(remoteHost));
         std::cout << "Server get connection from: " << remoteHost << '\n' <<  std::endl;
 

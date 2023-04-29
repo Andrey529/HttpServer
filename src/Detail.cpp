@@ -1,13 +1,26 @@
 #include "Detail.h"
 
-namespace http::detail {
-    void *get_in_addr(struct sockaddr *sa) {
-        return sa->sa_family == AF_INET
-               ? (void *) &(((struct sockaddr_in *) sa)->sin_addr)
-               : (void *) &(((struct sockaddr_in6 *) sa)->sin6_addr);
-    }
-    void sigchld_handler(int) {
-        while(waitpid(-1, nullptr, WNOHANG) > 0);
-    }
+bool http::detail::StringsComparator::operator()(const std::string &s1, const std::string &s2) const {
+    return std::lexicographical_compare(s1.begin(), s1.end(), s2.begin(),
+                                        s2.end(),
+                                        [](unsigned char c1, unsigned char c2) {
+                                            return ::tolower(c1) < ::tolower(c2);
+                                        });
+}
 
-} // namespace http::detail
+bool http::detail::hasHeader(const http::detail::Headers &headers, const std::string &key) {
+    return headers.contains(key);
+}
+
+std::string http::detail::getHeaderValue(const Headers &headers, const std::string &key) {
+    for(const auto & header : headers) {
+        if (header.first == key) {
+            return header.second;
+        }
+    }
+    return "";
+}
+
+void http::detail::setHeader(http::detail::Headers &headers, const std::string &key, const std::string &value) {
+    headers.emplace(key, value);
+}

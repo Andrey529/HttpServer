@@ -1,14 +1,19 @@
 #ifndef HTTPSERVER_DETAIL_H
 #define HTTPSERVER_DETAIL_H
 
-#include <netdb.h>
-#include <cstdlib>
-#include <sys/wait.h>
+#include <string>
+#include <map>
 
 namespace http::detail {
-    void *get_in_addr(struct sockaddr *sa);
-    void sigchld_handler(int);
+    struct StringsComparator {
+        bool operator()(const std::string &s1, const std::string &s2) const;
+    };
 
-} // namespace http::detail
+    using Headers = std::multimap<std::string, std::string, StringsComparator>;
+
+    bool hasHeader(const Headers &headers, const std::string &key);
+    std::string getHeaderValue(const Headers &headers, const std::string &key);
+    void setHeader(Headers &headers, const std::string &key, const std::string &value);
+}
 
 #endif //HTTPSERVER_DETAIL_H

@@ -13,7 +13,7 @@
 #include <iostream>
 #include <string>
 
-#include "Detail.h"
+#include "NetDetail.h"
 
 namespace http {
 
