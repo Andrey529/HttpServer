@@ -1,15 +1,22 @@
 #ifndef HTTPSERVER_REQUESTTYPE_H
 #define HTTPSERVER_REQUESTTYPE_H
 
+#include <string>
+
 namespace http {
 
     enum class RequestType {
         GET,
         POST,
-        UPDATE,
+        PUT,
         DELETE,
-        OPTIONS
+        OPTIONS,
+        HEAD
     };
+
+    std::string requestTypeToString(const RequestType &requestType);
+
+    RequestType stringToRequestType(const std::string &str);
 
 } // namespace http
 

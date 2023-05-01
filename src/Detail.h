@@ -14,6 +14,6 @@ namespace http::detail {
     bool hasHeader(const Headers &headers, const std::string &key);
     std::string getHeaderValue(const Headers &headers, const std::string &key);
     void setHeader(Headers &headers, const std::string &key, const std::string &value);
-}
+} // namespace http::detail
 
 #endif //HTTPSERVER_DETAIL_H
