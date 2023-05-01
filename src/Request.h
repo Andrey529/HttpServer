@@ -17,12 +17,18 @@ namespace http {
 
         Headers headers_;
         std::string body_;
-
+    private:
+        size_t contentLength_ = 0;
+    public:
         Request() = default;
         Request(const std::string &method, const std::string &path, const std::string version,
-                const Headers &headers, const std::string &body)
-                : method_(stringToRequestType(method)), path_(path), version_(version), headers_(headers), body_(body) {}
-
+                const Headers &headers, const std::string &body, const size_t &contentLength)
+                : method_(stringToRequestType(method)), path_(path), version_(version),
+                  headers_(headers), body_(body), contentLength_(contentLength) {}
+        Request(const Request &) = default;
+        Request& operator=(const Request &) = default;
+        Request(Request &&) = default;
+        Request& operator=(Request &&) = default;
         ~Request() = default;
 
 //        std::string remote_addr;

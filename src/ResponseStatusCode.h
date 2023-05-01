@@ -58,6 +58,7 @@ namespace http {
     };
 
     std::string responseStatusCodeToString(const ResponseStatusCode &responseStatusCode);
+    std::string responseStatusCodeToStringNumber(const ResponseStatusCode &responseStatusCode);
     ResponseStatusCode stringToResponseStatusCode(const std::string &str);
 
 } // namespace http

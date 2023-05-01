@@ -2,6 +2,60 @@
 
 std::string http::responseStatusCodeToString(const http::ResponseStatusCode &responseStatusCode) {
     switch (responseStatusCode) {
+        case ResponseStatusCode::CONTINUE: return "Continue";
+        case ResponseStatusCode::SWITCHING_PROTOCOLS: return "Switching Protocols";
+        case ResponseStatusCode::PROCESSING: return "Processing";
+        case ResponseStatusCode::EARLY_HINTS: return "Early Hints";
+        case ResponseStatusCode::OK: return "OK";
+        case ResponseStatusCode::CREATED: return "Created";
+        case ResponseStatusCode::ACCEPTED: return "Accepted";
+        case ResponseStatusCode::NO_CONTENT: return "No Content";
+        case ResponseStatusCode::RESET_CONTENT: return "Reset Content";
+        case ResponseStatusCode::PARTIAL_CONTENT: return "Partial Content";
+        case ResponseStatusCode::MULTI_STATUS: return "Multi-Status";
+        case ResponseStatusCode::ALREADY_REPORTED: return "Already Reported";
+        case ResponseStatusCode::MULTIPLE_CHOICES: return "Multiple Choices";
+        case ResponseStatusCode::MOVED_PERMANENTLY: return "Moved Permanently";
+        case ResponseStatusCode::FOUND: return "Found";
+        case ResponseStatusCode::SEE_OTHER: return "See Other";
+        case ResponseStatusCode::NOT_MODIFIED: return "Not Modified";
+        case ResponseStatusCode::TEMPORARY_REDIRECT: return "Temporary Redirect";
+        case ResponseStatusCode::PERMANENT_REDIRECT: return "Permanent Redirect";
+        case ResponseStatusCode::BAD_REQUEST: return "Bad Request";
+        case ResponseStatusCode::UNAUTHORIZED: return "Unauthorized";
+        case ResponseStatusCode::PAYMENT_REQUIRED: return "Payment Required";
+        case ResponseStatusCode::FORBIDDEN: return "Forbidden";
+        case ResponseStatusCode::NOT_FOUND: return "Not Found";
+        case ResponseStatusCode::METHOD_NOT_ALLOWED: return "Method Not Allowed";
+        case ResponseStatusCode::NOT_ACCEPTABLE: return "Not Acceptable";
+        case ResponseStatusCode::PROXY_AUTHENTICATION_REQUIRED: return "Proxy Authentication Required";
+        case ResponseStatusCode::REQUEST_TIMEOUT: return "Request Timeout";
+        case ResponseStatusCode::CONFLICT: return "Conflict";
+        case ResponseStatusCode::GONE: return "Gone";
+        case ResponseStatusCode::LENGTH_REQUIRED: return "Length Required";
+        case ResponseStatusCode::PRECONDITION_FAILED: return "Precondition Failed";
+        case ResponseStatusCode::CONTENT_TOO_LARGE: return "Content Too Large";
+        case ResponseStatusCode::URI_TOO_LONG: return "URI Too Long";
+        case ResponseStatusCode::UNSUPPORTED_MEDIA_TYPE: return "Unsupported Media Type";
+        case ResponseStatusCode::MISDIRECTED_REQUEST: return "Misdirected Request";
+        case ResponseStatusCode::UNPROCESSABLE_CONTENT: return "Unprocessable Content";
+        case ResponseStatusCode::LOCKED: return "Locked";
+        case ResponseStatusCode::INTERNAL_SERVER_ERROR: return "Internal Server Error";
+        case ResponseStatusCode::NOT_IMPLEMENTED: return "Not Implemented";
+        case ResponseStatusCode::BAD_GATEWAY: return "Bad Gateway";
+        case ResponseStatusCode::SERVICE_UNAVAILABLE: return "Service Unavailable";
+        case ResponseStatusCode::GATEWAY_TIMEOUT: return "Gateway Timeout";
+        case ResponseStatusCode::HTTP_VERSION_NOT_SUPPORTED: return "HTTP Version Not Supported";
+        case ResponseStatusCode::VARIANT_ALSO_NEGOTIATES: return "Variant Also Negotiates";
+        case ResponseStatusCode::INSUFFICIENT_STORAGE: return "Insufficient Storage";
+        case ResponseStatusCode::LOOP_DETECTED: return "Loop Detected";
+        case ResponseStatusCode::NOT_EXTENDED: return "Not Extended";
+        case ResponseStatusCode::NETWORK_AUTHENTICATION_REQUIRED: return "Network Authentication Required";
+    }
+}
+
+std::string http::responseStatusCodeToStringNumber(const http::ResponseStatusCode &responseStatusCode) {
+    switch (responseStatusCode) {
         case ResponseStatusCode::CONTINUE: return "100";
         case ResponseStatusCode::SWITCHING_PROTOCOLS: return "101";
         case ResponseStatusCode::PROCESSING: return "102";
@@ -105,3 +159,5 @@ http::ResponseStatusCode http::stringToResponseStatusCode(const std::string &str
     else if(str == "510") return ResponseStatusCode::NOT_EXTENDED;
     else if(str == "511") return ResponseStatusCode::NETWORK_AUTHENTICATION_REQUIRED;
 }
+
+

@@ -9,5 +9,5 @@ add_executable(HttpServer src/main.cpp
         src/NetDetail.h src/NetDetail.cpp
         src/Request.cpp src/Request.h
         src/Detail.cpp src/Detail.h
-        #[[src/Response.cpp src/Response.h]]
+        src/Response.cpp src/Response.h
         src/ResponseStatusCode.h src/ResponseStatusCode.cpp)
