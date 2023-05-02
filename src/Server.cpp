@@ -89,9 +89,10 @@ void http::Server::start() {
         std::cout << "====== New connection ======\n" << std::endl;
 
         char remoteHost[INET6_ADDRSTRLEN];
-        inet_ntop(their_address.ss_family, http::detail::net::get_in_addr((struct sockaddr *) &their_address), remoteHost,
+        inet_ntop(their_address.ss_family, http::detail::net::get_in_addr((struct sockaddr *) &their_address),
+                  remoteHost,
                   sizeof(remoteHost));
-        std::cout << "Server get connection from: " << remoteHost << '\n' <<  std::endl;
+        std::cout << "Server get connection from: " << remoteHost << '\n' << std::endl;
 
         // spawning a new process
         if (!fork()) {
@@ -135,4 +136,79 @@ http::Server::~Server() {
     close(fileDescriptorSocket_);
 }
 
+http::Server &http::Server::insertHandler(const http::RequestType &requestType, const std::string &path,
+                                          http::Server::Handler &handler) {
+    if (handlers.contains(requestType)) {
+        std::vector<std::pair<std::string, Handler>> handlersWithPath = handlers.at(requestType);
+        handlersWithPath.emplace_back(path, handler);
+        handlers.at(requestType) = handlersWithPath;
+    } else {
+        std::vector<std::pair<std::string, Handler>> handlersWithPath = {};
+        handlersWithPath.emplace_back(path, handler);
+        handlers.emplace(requestType, handlersWithPath);
+    }
+    return *this;
+}
+
+http::Server &http::Server::insertHandler(const http::RequestType &requestType, const std::string &path,
+                                          http::Server::Handler &&handler) {
+    if (handlers.contains(requestType)) {
+        std::vector<std::pair<std::string, Handler>> handlersWithPath = handlers.at(requestType);
+        handlersWithPath.emplace_back(path, std::move(handler));
+        handlers.at(requestType) = handlersWithPath;
+    } else {
+        std::vector<std::pair<std::string, Handler>> handlersWithPath = {};
+        handlersWithPath.emplace_back(path, std::move(handler));
+        handlers.emplace(requestType, handlersWithPath);
+    }
+    return *this;
+}
+
+http::Server &http::Server::Get(const std::string &path, http::Server::Handler &handler) {
+    return insertHandler(RequestType::GET, path, handler);
+}
+
+http::Server &http::Server::Get(const std::string &path, http::Server::Handler &&handler) {
+    return insertHandler(RequestType::GET, path, std::move(handler));
+}
+
+http::Server &http::Server::Post(const std::string &path, http::Server::Handler &handler) {
+    return insertHandler(RequestType::POST, path, handler);
+}
+
+http::Server &http::Server::Post(const std::string &path, http::Server::Handler &&handler) {
+    return insertHandler(RequestType::POST, path, std::move(handler));
+}
+
+http::Server &http::Server::Put(const std::string &path, http::Server::Handler &handler) {
+    return insertHandler(RequestType::PUT, path, handler);;
+}
+
+http::Server &http::Server::Put(const std::string &path, http::Server::Handler &&handler) {
+    return insertHandler(RequestType::PUT, path, std::move(handler));
+}
+
+http::Server &http::Server::Delete(const std::string &path, http::Server::Handler &handler) {
+    return insertHandler(RequestType::DELETE, path, handler);
+}
+
+http::Server &http::Server::Delete(const std::string &path, http::Server::Handler &&handler) {
+    return insertHandler(RequestType::DELETE, path, std::move(handler));
+}
+
+http::Server &http::Server::Options(const std::string &path, http::Server::Handler &handler) {
+    return insertHandler(RequestType::OPTIONS, path, handler);
+}
+
+http::Server &http::Server::Options(const std::string &path, http::Server::Handler &&handler) {
+    return insertHandler(RequestType::OPTIONS, path, std::move(handler));
+}
+
+http::Server &http::Server::Head(const std::string &path, http::Server::Handler &handler) {
+    return insertHandler(RequestType::HEAD, path, handler);
+}
+
+http::Server &http::Server::Head(const std::string &path, http::Server::Handler &&handler) {
+    return insertHandler(RequestType::HEAD, path, std::move(handler));
+}
 

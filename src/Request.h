@@ -39,7 +39,7 @@ namespace http {
 //        std::string target;
 
         bool hasHeader(const std::string &key) const;
-        std::string getHeaderValue(const std::string &key) const;
+        [[nodiscard]] std::string getHeaderValue(const std::string &key) const;
         void setHeader(const std::string &key, const std::string &value);
     };
 } // namespace http

@@ -16,6 +16,7 @@ namespace http {
         ResponseStatusCode statusCode_;
         Headers headers_;
         std::string body_;
+        std::string contentType_;
         std::string location_;
 
     private:
@@ -23,9 +24,10 @@ namespace http {
     public:
         Response() = default;
         Response(const std::string &version, const ResponseStatusCode &statusCode, const Headers &headers,
-                 const std::string &body, const std::string &location, const size_t &contentLength)
+                 const std::string &body, const std::string &contentType, const std::string &location,
+                 const size_t &contentLength)
                  : version_(version), statusCode_(statusCode), headers_(headers), body_(body),
-                   location_(location), contentLength_(contentLength) { }
+                   contentType_(contentType), location_(location), contentLength_(contentLength) { }
         Response(const Response &) = default;
         Response& operator=(const Response &) = default;
         Response(Response &&) = default;
@@ -33,9 +35,9 @@ namespace http {
         ~Response() = default;
 
         bool hasHeader(const std::string &key) const;
-        std::string getHeaderValue(const std::string &key) const;
+        [[nodiscard]]std::string getHeaderValue(const std::string &key) const;
         void setHeader(const std::string &key, const std::string &value);
-
+        void set_content(const std::string &content, const std::string &contentType);
     };
 } // namespace http
 

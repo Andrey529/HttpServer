@@ -11,3 +11,8 @@ std::string http::Response::getHeaderValue(const std::string &key) const {
 void http::Response::setHeader(const std::string &key, const std::string &value) {
     http::detail::setHeader(headers_, key, value);
 }
+
+void http::Response::set_content(const std::string &content, const std::string &contentType) {
+    contentType_ = contentType;
+    body_ = content;
+}
