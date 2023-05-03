@@ -94,19 +94,17 @@ void http::Server::start() {
                   sizeof(remoteHost));
         std::cout << "Server get connection from: " << remoteHost << '\n' << std::endl;
 
-        // spawning a new process
+//         spawning a new process
         if (!fork()) {
             close(fileDescriptorSocket_); // this socket does not need to be listened to, it is only needed for the parent process
 
             std::cout << "------ Received Request from client ------\n" << std::endl;
             // read request
-            char buffer[bufferSize] = {0};
-            ssize_t bytesReceived = read(fileDescriptorNewSocket_, buffer, bufferSize);
-            if (bytesReceived < 0) {
-                std::cout << "Failed to read bytes from client socket connection" << std::endl;
-            } else {
-                std::cout << buffer << std::endl;
-            }
+            std::string requestString;
+            readRequest(requestString);
+
+            Request request;
+            parseRequest(requestString, request);
 
             // creating response
             std::string htmlFile = "<!DOCTYPE html><html lang=\"en\"><body><h1> HOME </h1><p> Hello from your Server :) </p></body></html>";
@@ -210,5 +208,75 @@ http::Server &http::Server::Head(const std::string &path, http::Server::Handler 
 
 http::Server &http::Server::Head(const std::string &path, http::Server::Handler &&handler) {
     return insertHandler(RequestType::HEAD, path, std::move(handler));
+}
+
+void http::Server::readRequest(std::string &requestString) {
+    char buffer[bufferSize] = {0};
+    ssize_t bytesReceived = read(fileDescriptorNewSocket_, buffer, bufferSize);
+    if (bytesReceived < 0) {
+        std::cout << "Failed to read bytes from client socket connection" << std::endl;
+
+        // TODO: add handling this situation
+        //  server must return 5** number of error
+    } else {
+        std::cout << buffer << std::endl;
+        requestString = buffer;
+    }
+}
+
+void http::Server::parseRequest(std::string &requestString, http::Request &request) {
+    // TODO: add exception handling
+
+    // search for the body of the request, and if it is exist, then set it
+    size_t positionBody = requestString.find("\r\n\r\n");
+    if (positionBody == -1) { // not find substr = "\r\n\r\n"
+        positionBody = requestString.find("\n\n");
+        if (positionBody != -1) { // find substr = "\n\n", request body next
+            positionBody += 2;
+            request.body_ = requestString.substr(positionBody);
+            requestString.erase(positionBody);
+        }
+    } else { // find substr = "\r\n\r\n", request body next
+        positionBody += 4;
+        request.body_ = requestString.substr(positionBody);
+        requestString.erase(positionBody);
+    }
+
+
+    // splitting http headers into separate lines
+    std::vector<std::string> stringsFromRequest;
+    std::string temp;
+    for (auto it = requestString.begin(); it != requestString.end(); ++it) {
+        if (*it == '\n') {
+            if (!temp.empty() && temp.substr(temp.size() - 1) == "\r") {
+                temp = temp.substr(0, temp.size() - 1);
+            }
+            if (!temp.empty()) {
+                stringsFromRequest.emplace_back(temp);
+                temp.clear();
+            }
+        } else {
+            temp += *it;
+        }
+    }
+
+    if (!temp.empty()) {
+        stringsFromRequest.emplace_back(temp);
+    }
+
+
+    // parse first main request string
+    request.method_ = http::stringToRequestType(stringsFromRequest[0].substr(0, stringsFromRequest[0].find(' ')));
+    stringsFromRequest[0].erase(0, stringsFromRequest[0].find(' ') + 1);
+
+    request.path_ = stringsFromRequest[0].substr(0, stringsFromRequest[0].find(' '));
+    request.version_ = stringsFromRequest[0].substr(stringsFromRequest[0].find(' ') + 1);
+
+    // parse headers
+    for (size_t i = 1; i < stringsFromRequest.size(); ++i) {
+        request.setHeader(stringsFromRequest[i].substr(0, stringsFromRequest[i].find(':')), stringsFromRequest[i].substr(stringsFromRequest[i].find(':') + 1));
+    }
+
+    std::cout << "Request has been successfully parsed" << std::endl;
 }
 

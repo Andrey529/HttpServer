@@ -58,9 +58,10 @@ namespace http {
         Server &insertHandler(const RequestType& requestType, const std::string &path, Handler &handler);
         Server &insertHandler(const RequestType& requestType, const std::string &path, Handler &&handler);
 
-        void parseRequest();
-        void processRequest();
-        void sendResponse();
+        void readRequest(std::string &requestString);
+        void parseRequest(std::string &requestString, Request &request);
+        void processRequestAndCreateResponse(const Request &request, Response &response);
+        void sendResponse(const Response &response);
     };
 } // namespace http
 
