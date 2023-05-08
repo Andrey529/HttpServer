@@ -12,22 +12,19 @@ namespace http {
     public:
         using Headers = std::multimap<std::string, std::string, http::detail::StringsComparator>;
 
-        std::string version_;
-        ResponseStatusCode statusCode_;
+        std::string version_ = "HTTP/1.1";
+        ResponseStatusCode statusCode_ = ResponseStatusCode::OK;
         Headers headers_;
         std::string body_;
         std::string contentType_;
-        std::string location_;
-
-    private:
         size_t contentLength_ = 0;
-    public:
+
         Response() = default;
         Response(const std::string &version, const ResponseStatusCode &statusCode, const Headers &headers,
                  const std::string &body, const std::string &contentType, const std::string &location,
                  const size_t &contentLength)
                  : version_(version), statusCode_(statusCode), headers_(headers), body_(body),
-                   contentType_(contentType), location_(location), contentLength_(contentLength) { }
+                   contentType_(contentType), contentLength_(contentLength) { }
         Response(const Response &) = default;
         Response& operator=(const Response &) = default;
         Response(Response &&) = default;

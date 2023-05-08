@@ -9,14 +9,22 @@ int main(int argc, char **argv) {
 
     http::Server server(argv[1], std::stoi(argv[2]));
 
-    server.Get("/da", [](const http::Request &, const http::Response &){
-        std::cout << "da" << std::endl;
+    server.Get("/sample", [](const http::Request &, http::Response &response){
+        response.set_content("<html><body><h1>sample</h1></body></html>", "text/html");
     });
 
-    auto golova = [](const http::Request &, const http::Response &){
-        std::cout << "Sho ti golova" << std::endl;
-    };
-    server.Get("/golova", golova);
+    server.Get("/empty", [](const http::Request &, http::Response &response){
+
+    });
+
+    server.Get("/text", [](const http::Request &, http::Response &response){
+        response.set_content("Text plain", "text/plain");
+    });
+
+    server.Post("/post", [](const http::Request &, http::Response &response){
+        response.set_content("Post", "text/plain");
+    });
+
 
     server.start();
 

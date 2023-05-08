@@ -106,22 +106,10 @@ void http::Server::start() {
             Request request;
             parseRequest(requestString, request);
 
-            // creating response
-            std::string htmlFile = "<!DOCTYPE html><html lang=\"en\"><body><h1> HOME </h1><p> Hello from your Server :) </p></body></html>";
-            std::ostringstream ss;
-            ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: " << htmlFile.size() << "\n\n"
-               << htmlFile;
+            Response response;
+            processRequestAndCreateResponse(request, response);
 
-            // send response
-            ssize_t bytesSent = send(fileDescriptorNewSocket_, ss.str().c_str(), ss.str().size(), 0);
-
-            std::cout << "------ Server Response sent to client ------\n" << std::endl;
-            std::cout << ss.str() << '\n' << std::endl;
-
-
-            if (bytesSent < 0) {
-                std::cerr << "Failed to send bytes to client socket connection" << std::endl;
-            }
+            sendResponse(response);
 
             close(fileDescriptorNewSocket_);
             exit(0);
@@ -136,28 +124,28 @@ http::Server::~Server() {
 
 http::Server &http::Server::insertHandler(const http::RequestType &requestType, const std::string &path,
                                           http::Server::Handler &handler) {
-    if (handlers.contains(requestType)) {
-        std::vector<std::pair<std::string, Handler>> handlersWithPath = handlers.at(requestType);
+    if (handlers_.contains(requestType)) {
+        std::vector<std::pair<std::string, Handler>> handlersWithPath = handlers_.at(requestType);
         handlersWithPath.emplace_back(path, handler);
-        handlers.at(requestType) = handlersWithPath;
+        handlers_.at(requestType) = handlersWithPath;
     } else {
         std::vector<std::pair<std::string, Handler>> handlersWithPath = {};
         handlersWithPath.emplace_back(path, handler);
-        handlers.emplace(requestType, handlersWithPath);
+        handlers_.emplace(requestType, handlersWithPath);
     }
     return *this;
 }
 
 http::Server &http::Server::insertHandler(const http::RequestType &requestType, const std::string &path,
                                           http::Server::Handler &&handler) {
-    if (handlers.contains(requestType)) {
-        std::vector<std::pair<std::string, Handler>> handlersWithPath = handlers.at(requestType);
+    if (handlers_.contains(requestType)) {
+        std::vector<std::pair<std::string, Handler>> handlersWithPath = handlers_.at(requestType);
         handlersWithPath.emplace_back(path, std::move(handler));
-        handlers.at(requestType) = handlersWithPath;
+        handlers_.at(requestType) = handlersWithPath;
     } else {
         std::vector<std::pair<std::string, Handler>> handlersWithPath = {};
         handlersWithPath.emplace_back(path, std::move(handler));
-        handlers.emplace(requestType, handlersWithPath);
+        handlers_.emplace(requestType, handlersWithPath);
     }
     return *this;
 }
@@ -211,8 +199,8 @@ http::Server &http::Server::Head(const std::string &path, http::Server::Handler 
 }
 
 void http::Server::readRequest(std::string &requestString) {
-    char buffer[bufferSize] = {0};
-    ssize_t bytesReceived = read(fileDescriptorNewSocket_, buffer, bufferSize);
+    char buffer[bufferSize_] = {0};
+    ssize_t bytesReceived = read(fileDescriptorNewSocket_, buffer, bufferSize_);
     if (bytesReceived < 0) {
         std::cout << "Failed to read bytes from client socket connection" << std::endl;
 
@@ -234,11 +222,13 @@ void http::Server::parseRequest(std::string &requestString, http::Request &reque
         if (positionBody != -1) { // find substr = "\n\n", request body next
             positionBody += 2;
             request.body_ = requestString.substr(positionBody);
+            request.contentLength_ = request.body_.size();
             requestString.erase(positionBody);
         }
     } else { // find substr = "\r\n\r\n", request body next
         positionBody += 4;
         request.body_ = requestString.substr(positionBody);
+        request.contentLength_ = request.body_.size();
         requestString.erase(positionBody);
     }
 
@@ -274,9 +264,79 @@ void http::Server::parseRequest(std::string &requestString, http::Request &reque
 
     // parse headers
     for (size_t i = 1; i < stringsFromRequest.size(); ++i) {
-        request.setHeader(stringsFromRequest[i].substr(0, stringsFromRequest[i].find(':')), stringsFromRequest[i].substr(stringsFromRequest[i].find(':') + 1));
+        request.setHeader(stringsFromRequest[i].substr(0, stringsFromRequest[i].find(':')),
+                          stringsFromRequest[i].substr(stringsFromRequest[i].find(':') + 1));
     }
 
     std::cout << "Request has been successfully parsed" << std::endl;
+}
+
+void http::Server::processRequestAndCreateResponse(const http::Request &request, http::Response &response) {
+
+    response.setHeader("Server", "Andrey529/HttpServer");
+    response.setHeader("Connection", "Close");
+
+    try {
+        std::string requestPath = request.path_;
+        Handler handler;
+        std::vector<std::pair<std::string, Handler>> handlersByRequestType = handlers_.at(request.method_);
+        for (const auto &elem: handlersByRequestType) {
+            if (elem.first == requestPath) {
+                handler = elem.second;
+            }
+        }
+
+        if (handler != nullptr) {
+            response.statusCode_ = ResponseStatusCode::OK;
+            response.version_ = "HTTP/1.1";
+            handler(request, response);
+            if (!response.body_.empty()) {
+                response.setHeader("Content-Type", response.contentType_);
+                response.setHeader("Content-Length", std::to_string(response.contentLength_));
+            }
+        } else {
+            response.statusCode_ = ResponseStatusCode::NOT_FOUND; // 404
+            std::string message = "<html><body><h1>Resource not found</h1></body></html>";
+            response.set_content(message, "text/html; charset=utf-8");
+            response.setHeader("Content-Length", std::to_string(response.contentLength_));
+            response.setHeader("Content-Type", "text/html; charset=utf-8");
+        }
+    } catch (const std::exception &exception) {
+        std::cout << "Internal server error while processing request and creating response\n" << exception.what() << std::endl;
+        response.statusCode_ = ResponseStatusCode::INTERNAL_SERVER_ERROR; // 500
+        response.setHeader("Content-Type", "text/html; charset=utf-8");
+        std::string message("<html><body><h1>Internal server error</h1></body></html>");
+        response.set_content(message, "text/html");
+        response.setHeader("Content-Length", std::to_string(response.contentLength_));
+    }
+
+}
+
+void http::Server::sendResponse(const http::Response &response) {
+    // creating response
+    std::string statusLine =
+            response.version_ + " " + http::responseStatusCodeToStringNumber(response.statusCode_) + " " +
+            http::responseStatusCodeToString(response.statusCode_) + '\n';
+
+    std::ostringstream responseString;
+    responseString << statusLine;
+    for (const auto &header : response.headers_) {
+        responseString << header.first << ": " << header.second << '\n';
+    }
+
+    if (!response.body_.empty()) {
+        responseString << "\r\n" << response.body_;
+    }
+
+    // send response
+    ssize_t bytesSent = send(fileDescriptorNewSocket_, responseString.str().c_str(), responseString.str().size(), 0);
+
+    std::cout << "------ Server Response sent to client ------\n" << std::endl;
+    std::cout << responseString.str() << '\n' << std::endl;
+
+    if (bytesSent < 0) {
+        std::cerr << "Failed to send bytes to client socket connection" << std::endl;
+    }
+
 }
 

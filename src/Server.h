@@ -24,7 +24,7 @@ namespace http {
 
     class Server {
     public:
-        using Handler = std::function<void(const Request &, const Response &)>;
+        using Handler = std::function<void(const Request &, Response &)>;
 
         using Handlers = std::unordered_map<RequestType, std::vector<std::pair<std::string, Handler>>>;
 
@@ -52,8 +52,8 @@ namespace http {
         int fileDescriptorSocket_;
         int fileDescriptorNewSocket_;
         int connectionsCount_ = 20;
-        static const int bufferSize = 1024;
-        Handlers handlers;
+        static const int bufferSize_ = 1024;
+        Handlers handlers_;
 
         Server &insertHandler(const RequestType& requestType, const std::string &path, Handler &handler);
         Server &insertHandler(const RequestType& requestType, const std::string &path, Handler &&handler);

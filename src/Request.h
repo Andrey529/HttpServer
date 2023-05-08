@@ -17,9 +17,8 @@ namespace http {
 
         Headers headers_;
         std::string body_;
-    private:
         size_t contentLength_ = 0;
-    public:
+
         Request() = default;
         Request(const std::string &method, const std::string &path, const std::string version,
                 const Headers &headers, const std::string &body, const size_t &contentLength)
