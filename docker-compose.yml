@@ -3,7 +3,7 @@ version: "3.5"
 services:
   IoTService:
     container_name: HttpServer
-    image: http-server
+    image: 5292510856/httpserver:latest
     build: .
     ports:
       - "8080:8080"

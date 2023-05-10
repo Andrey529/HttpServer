@@ -15,6 +15,7 @@
 #include <vector>
 #include <unordered_map>
 #include <functional>
+#include <fstream>
 
 #include "NetDetail.h"
 #include "Request.h"

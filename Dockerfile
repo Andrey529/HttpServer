@@ -9,6 +9,7 @@ RUN apt-get update && \
     apt-get install -y cmake
 
 ADD ./src /app/src
+ADD ./pages /app/pages
 ADD ./CMakeLists.txt /app
 
 WORKDIR /app/build

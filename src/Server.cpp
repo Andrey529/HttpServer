@@ -296,7 +296,15 @@ void http::Server::processRequestAndCreateResponse(const http::Request &request,
             }
         } else {
             response.statusCode_ = ResponseStatusCode::NOT_FOUND; // 404
-            std::string message = "<html><body><h1>Resource not found</h1></body></html>";
+            std::string message;
+            std::ifstream htmlFile("../pages/resourse-not-found-404.html", std::ios::in);
+            if (htmlFile.is_open()) {
+                while (htmlFile) {
+                    message += htmlFile.get();
+                }
+            }
+            message.erase(message.size() - 1);
+
             response.set_content(message, "text/html; charset=utf-8");
             response.setHeader("Content-Length", std::to_string(response.contentLength_));
             response.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -305,7 +313,14 @@ void http::Server::processRequestAndCreateResponse(const http::Request &request,
         std::cout << "Internal server error while processing request and creating response\n" << exception.what() << std::endl;
         response.statusCode_ = ResponseStatusCode::INTERNAL_SERVER_ERROR; // 500
         response.setHeader("Content-Type", "text/html; charset=utf-8");
-        std::string message("<html><body><h1>Internal server error</h1></body></html>");
+        std::string message;
+        std::ifstream htmlFile("../pages/internal-server-error-500.html", std::ios::in);
+        if (htmlFile.is_open()) {
+            while (htmlFile) {
+                message += htmlFile.get();
+            }
+        }
+        message.erase(message.size() - 1);
         response.set_content(message, "text/html");
         response.setHeader("Content-Length", std::to_string(response.contentLength_));
     }
